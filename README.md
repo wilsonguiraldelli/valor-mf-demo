@@ -19,11 +19,42 @@ Each remote is a standalone React app that also works independently.
 ## Tech Stack
 
 - **Vite** — Build tool and dev server for all three apps.
-- **@module-federation/vite** — Official Module Federation plugin for Vite. Handles runtime module sharing between host and remotes.
+- **vite-plugin-zephyr** — Zephyr Cloud plugin for Vite. Wraps `@module-federation/vite` and handles runtime module sharing, remote dependency resolution, and automatic deployment to Zephyr Cloud on every build.
 - **React 19** — UI library. Shared as a singleton across all apps to avoid duplicate instances.
 - **Tailwind CSS 3** — Utility-first CSS framework.
 - **Radix UI** — Unstyled, accessible primitives (avatar, button) used under the hood.
 - **TypeScript** — Static typing across the entire project.
+
+## Zephyr Cloud
+
+This project is integrated with [Zephyr Cloud](https://zephyr-cloud.io/) for automatic deployment and remote dependency resolution.
+
+**Every `pnpm build` automatically deploys the app to Zephyr Cloud** — no extra commands needed. After the build completes, you'll see a deployed URL in the terminal output.
+
+Remote dependencies are declared in `main/package.json` under `zephyr:dependencies`:
+
+```json
+"zephyr:dependencies": {
+  "header": "header@*",
+  "follow-button": "follow-button@*"
+}
+```
+
+This allows Zephyr to resolve the remote URLs at build time, replacing the hardcoded `localhost` fallbacks with the actual deployed URLs. This means:
+
+- Remotes don't need to be running locally for the host to work in preview/production.
+- Each build creates a versioned deployment with its own permanent URL.
+- You can manage versions, rollbacks, and environments through the [Zephyr Cloud dashboard](https://app.zephyr-cloud.io).
+
+**Build order matters** — remotes must be built (and deployed) before the host so Zephyr can resolve them:
+
+```bash
+cd header && pnpm build
+cd follow-button && pnpm build
+cd main && pnpm build
+```
+
+> Requires the [Zephyr Cloud Chrome extension](https://chromewebstore.google.com/detail/zephyr-mission-control/liflhldchhinbaeplljlplhnbkdidedn) and being logged in (first build will prompt login automatically).
 
 ## Prerequisites
 
