@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import Header from "header";
-import FollowButton from "followButton";
+import FollowButton from "follow-button";
 
 function App() {
   return (

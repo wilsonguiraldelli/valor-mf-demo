@@ -1,22 +1,26 @@
-import { defineConfig } from "vite"
-import react from "@vitejs/plugin-react"
-import { federation } from "@module-federation/vite"
-import { fileURLToPath, URL } from "node:url"
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { fileURLToPath, URL } from "node:url";
+import { withZephyr, type ModuleFederationOptions } from "vite-plugin-zephyr";
+
+const mfConfig: ModuleFederationOptions = {
+  name: "header",
+  filename: "remoteEntry.js",
+  dts: false,
+  exposes: {
+    ".": "./src/components/header.tsx",
+  },
+  shared: {
+    react: { singleton: true },
+    "react-dom": { singleton: true },
+  },
+};
 
 export default defineConfig({
   plugins: [
     react(),
-    federation({
-      name: "header",
-      filename: "remoteEntry.js",
-      dts: false,
-      exposes: {
-        ".": "./src/components/header.tsx",
-      },
-      shared: {
-        react: { singleton: true },
-        "react-dom": { singleton: true },
-      },
+    withZephyr({
+      mfConfig,
     }),
   ],
   resolve: {
@@ -24,11 +28,13 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  experimental: {
+    renderBuiltUrl() {
+      return { relative: true };
+    },
+  },
   build: {
-    modulePreload: false,
-    target: "esnext",
-    minify: false,
-    cssCodeSplit: false,
+    target: "chrome89",
   },
   server: {
     port: 5001,
@@ -36,4 +42,4 @@ export default defineConfig({
   preview: {
     port: 5001,
   },
-})
+});
